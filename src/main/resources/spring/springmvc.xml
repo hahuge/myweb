@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd 
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+        http://www.springframework.org/schema/task 
+        http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<!-- proxy-target-class为true时，使用cglib动态代理，为false时，使用JDK代理 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<context:component-scan base-package="com.hahuge.myweb"></context:component-scan>
+	<!-- 访问静态资源 -->
+	<!-- 容器默认的DefaultServletHandler处理 所有静态内容与无RequestMapping处理的URL-->	
+	<mvc:default-servlet-handler />  
+	<mvc:resources mapping="/resource/**" location="/resource/" order="1" />
+	
+	<!-- 使用 mvc:annotation-driven代替注解映射器和注解适配器配置 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<!--方法直接返回字符串时，中文字符乱码.  将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+		    	<constructor-arg value="UTF-8" />
+				<property name="writeAcceptCharset" value="false"/><!--@ResponseBody注解生成大量Accept-Charset-->
+			</bean>
+  		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<!-- 视图解析 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 配置jsp路径的前缀 -->
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<!-- 配置jsp路径的后缀 -->
+		<property name="suffix" value=".jsp"/>
+	</bean>
+	
+	<!-- 映射所有没有在controller中配置的path，对应到 jsp 目录中 -->
+	<mvc:view-controller path="/**" />
+	
+	<!-- 将Controller抛出的异常转到特定View-->
+	<!-- <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="java.lang.Throwable">error/500</prop>
+			</props>
+		</property>
+	</bean> -->
+	
+	<!-- 加载db.properties文件中的内容-->
+	<context:property-placeholder location="classpath:*.properties" ignore-unresolvable="true"/>
+	
+	<!-- SpringMVC文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置上传文件大小 -->
+		<property name="maxUploadSize">
+			<value>209715200</value>
+		</property>
+		<!-- 设置最大内存 -->
+		<property name="maxInMemorySize">
+			<value>4096</value>
+		</property>
+	</bean>
+</beans>
+        

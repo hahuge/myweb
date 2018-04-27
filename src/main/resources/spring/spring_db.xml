@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd 
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/task 
+        http://www.springframework.org/schema/task/spring-task.xsd"
+        default-lazy-init="true">
+	<context:property-placeholder location="classpath:*.properties" ignore-unresolvable="true"/>
+    <!-- 主应用 properties files -->
+ 	<!--  c3p0 -->
+	<bean id="app.myweb.dataSource" name="message.dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="initialPoolSize" value="${com.hahuge.jdbc.pool.init.size}" />
+		<property name="minPoolSize" value="${com.hahuge.jdbc.pool.init.size}" />
+		<property name="maxPoolSize" value="${com.hahuge.jdbc.pool.max.size}" />
+		<property name="maxIdleTime" value="60" />
+		<property name="idleConnectionTestPeriod" value="60" />
+		<property name="acquireIncrement" value="2" />
+		<property name="acquireRetryAttempts" value="10" />
+		<property name="breakAfterAcquireFailure" value="false" />
+		<property name="testConnectionOnCheckin" value="true" />
+		<property name="testConnectionOnCheckout" value="true" />
+		<property name="maxStatements" value="10" />
+		<property name="preferredTestQuery" value="SELECT 'x'" />
+  		
+		<property name="driverClass" value="${com.hahuge.jdbc.driverClass}" />
+		<property name="jdbcUrl" value="${com.hahuge.jdbc.url}" />
+		<property name="user" value="${com.hahuge.jdbc.username}" />
+		<property name="password" value="${com.hahuge.jdbc.password}" />
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" >
+		<property name="dataSource" ref="app.myweb.dataSource" />
+	</bean>
+	
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="app.myweb.dataSource" />
+	</bean>
+	
+	<!-- 开启注解事务 -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager"/> -->
+	
+	<!-- 配置事务的通知 -->
+	<!-- <tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			
+				propagation	:事务传播行为
+				isolation	:事务的隔离级别
+				read-only	:只读
+				rollback-for:发生哪些异常回滚
+				no-rollback-for	:发生哪些异常不回滚
+				timeout		:过期信息
+			
+			<tx:method name="transfer" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice> -->
+	
+	<!-- 配置切面 -->
+	<!-- <aop:config>
+		配置切入点
+		<aop:pointcut expression="execution(* com.zs.spring.demo3.AccountService+.*(..))" id="pointcut1"/>
+		配置切面
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut1"/>
+	</aop:config> -->
+</beans>
+        
